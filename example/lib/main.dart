@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
@@ -18,6 +20,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends HookWidget {
+  final streamController = StreamController<MemoryImage>();
   @override
   Widget build(BuildContext context) {
     final isRunning = useState(true);
@@ -31,6 +34,7 @@ class MyHomePage extends HookWidget {
             child: Center(
               child: Mjpeg(
                 isLive: isRunning.value,
+                imageStreamController: streamController,
                 error: (context, error, stack) {
                   print(error);
                   print(stack);
@@ -38,7 +42,7 @@ class MyHomePage extends HookWidget {
                       style: TextStyle(color: Colors.red));
                 },
                 stream:
-                    'http://192.168.10.20:8085/?action=stream', //'http://192.168.1.37:8081',
+                    'http://192.168.10.20:8082/?action=stream', //'http://192.168.1.37:8081',
               ),
             ),
           ),

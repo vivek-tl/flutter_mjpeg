@@ -49,6 +49,7 @@ class Mjpeg extends HookWidget {
       error;
   final Map<String, String> headers;
   final MjpegPreprocessor? preprocessor;
+  final StreamController<MemoryImage>? imageStreamController;
 
   const Mjpeg({
     this.httpClient,
@@ -58,6 +59,7 @@ class Mjpeg extends HookWidget {
     this.height,
     this.fit,
     required this.stream,
+    this.imageStreamController,
     this.error,
     this.loading,
     this.headers = const {},
@@ -71,7 +73,7 @@ class Mjpeg extends HookWidget {
     final state = useMemoized(() => _MjpegStateNotifier());
     final visible = useListenable(state);
     final errorState = useState<List<dynamic>?>(null);
-    final isMounted = useIsMounted();
+    final isMounted = context.mounted;
     final manager = useMemoized(
         () => _StreamManager(
               stream,
@@ -127,6 +129,8 @@ class Mjpeg extends HookWidget {
               : loading!(context));
     }
 
+    imageStreamController?.add(image.value!);
+
     return VisibilityDetector(
       key: key,
       child: Image(
@@ -156,7 +160,7 @@ class _StreamManager {
   final Map<String, String> headers;
   final Client _httpClient;
   final MjpegPreprocessor _preprocessor;
-  final bool Function() _mounted;
+  final bool _mounted;
   // ignore: cancel_subscriptions
   StreamSubscription? _subscription;
 
@@ -178,7 +182,7 @@ class _StreamManager {
     if (imageData == null) return;
 
     final imageMemory = MemoryImage(Uint8List.fromList(imageData));
-    if (_mounted()) {
+    if (_mounted) {
       errorState.value = null;
       image.value = imageMemory;
     }
@@ -231,7 +235,7 @@ class _StreamManager {
           }
         }, onError: (error, stack) {
           try {
-            if (_mounted()) {
+            if (_mounted) {
               errorState.value = [error, stack];
               image.value = null;
             }
@@ -239,7 +243,7 @@ class _StreamManager {
           dispose();
         }, cancelOnError: true);
       } else {
-        if (_mounted()) {
+        if (_mounted) {
           errorState.value = [
             HttpException('Stream returned ${response.statusCode} status'),
             StackTrace.current
@@ -253,7 +257,7 @@ class _StreamManager {
       if (!error
           .toString()
           .contains('Connection closed before full header was received')) {
-        if (_mounted()) {
+        if (_mounted) {
           errorState.value = [error, stack];
           image.value = null;
         }
