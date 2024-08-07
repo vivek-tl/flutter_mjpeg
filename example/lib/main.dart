@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mjpeg/controller/flutter_mjpeg_controller.dart';
 import 'package:flutter_mjpeg/flutter_mjpeg.dart';
 
 void main() => runApp(MyApp());
@@ -20,10 +19,19 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends HookWidget {
-  final streamController = StreamController<MemoryImage>();
+  final flutterMjpegController = FlutterMjpegController();
+
   @override
   Widget build(BuildContext context) {
     final isRunning = useState(true);
+
+    useEffect(
+      () {
+        print(flutterMjpegController.getFrame);
+        return null;
+      },
+      [],
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text('Flutter Demo Home Page'),
@@ -34,7 +42,7 @@ class MyHomePage extends HookWidget {
             child: Center(
               child: Mjpeg(
                 isLive: isRunning.value,
-                imageStreamController: streamController,
+                flutterMjpegController: flutterMjpegController,
                 error: (context, error, stack) {
                   print(error);
                   print(stack);
@@ -42,7 +50,7 @@ class MyHomePage extends HookWidget {
                       style: TextStyle(color: Colors.red));
                 },
                 stream:
-                    'http://192.168.10.20:8082/?action=stream', //'http://192.168.1.37:8081',
+                    'http://192.168.10.20:8080/?action=stream', //'http://192.168.1.37:8081',
               ),
             ),
           ),
@@ -66,6 +74,12 @@ class MyHomePage extends HookWidget {
             ],
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () {
+          print(flutterMjpegController.getFrame);
+        },
       ),
     );
   }

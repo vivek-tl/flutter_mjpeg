@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_mjpeg/controller/flutter_mjpeg_controller.dart';
 import 'package:http/http.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -49,7 +50,7 @@ class Mjpeg extends HookWidget {
       error;
   final Map<String, String> headers;
   final MjpegPreprocessor? preprocessor;
-  final StreamController<MemoryImage>? imageStreamController;
+  final FlutterMjpegController? flutterMjpegController;
 
   const Mjpeg({
     this.httpClient,
@@ -59,7 +60,7 @@ class Mjpeg extends HookWidget {
     this.height,
     this.fit,
     required this.stream,
-    this.imageStreamController,
+    this.flutterMjpegController,
     this.error,
     this.loading,
     this.headers = const {},
@@ -129,7 +130,7 @@ class Mjpeg extends HookWidget {
               : loading!(context));
     }
 
-    imageStreamController?.add(image.value!);
+    flutterMjpegController?.setFrame = image.value!;
 
     return VisibilityDetector(
       key: key,
